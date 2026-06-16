@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouTube Gesture Controller</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #222;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.15);
+    --text: #f0f0f0; --muted: #888;
+    --blue: #378ADD; --blue-bg: rgba(55,138,221,0.12); --blue-border: rgba(55,138,221,0.4);
+    --green: #5DCAA5; --radius: 12px; --radius-sm: 8px;
+  }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 2rem; gap: 1.5rem;
+  }
+  header { text-align: center; margin-bottom: 0.5rem; }
+  header h1 { font-size: 15px; font-weight: 500; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
+  header p { font-size: 12px; color: #555; margin-top: 4px; }
+  .status-dot {
+    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    background: #444; margin-right: 8px; transition: background 0.3s;
+  }
+  .status-dot.active { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; max-width: 600px; }
+  .metric { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; text-align: center; }
+  .metric-label { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+  .metric-value { font-size: 20px; font-weight: 500; color: var(--text); transition: color 0.2s; }
+  .metric-value.flash { color: var(--blue); }
+  .keys-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; max-width: 600px; }
+  .key-card {
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: var(--radius); padding: 18px 12px; text-align: center;
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+  }
+  .key-card.lit { background: var(--blue-bg); border: 1.5px solid var(--blue-border); transform: scale(0.97); }
+  .key-card .icon { font-size: 28px; margin-bottom: 8px; line-height: 1; }
+  .key-card .gesture-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+  .key-card .action-label { font-size: 12px; color: var(--text); margin-bottom: 8px; font-weight: 500; }
+  .key-badge {
+    display: inline-block; background: var(--surface2); border: 0.5px solid var(--border2);
+    border-radius: 6px; padding: 3px 8px; font-size: 12px; font-weight: 500;
+    letter-spacing: 0.04em; transition: background 0.15s, color 0.15s; color: var(--muted);
+  }
+  .key-card.lit .key-badge { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .log-box { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; width: 100%; max-width: 600px; }
+  .log-title { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 10px; }
+  .log-list { display: flex; flex-direction: column; gap: 5px; min-height: 52px; }
+  .log-entry { display: flex; justify-content: space-between; align-items: center; background: var(--surface2); border-radius: 6px; padding: 6px 10px; font-size: 13px; animation: fadeIn 0.2s ease; }
+  .log-entry .key-name { font-weight: 500; color: var(--blue); }
+  .log-entry .log-time { font-size: 11px; color: var(--muted); }
+  .empty-log { font-size: 13px; color: var(--muted); font-style: italic; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<header>
+  <h1><span class="status-dot" id="dot"></span>YouTube Gesture Controller</h1>
+  <p>Kamera ile YouTube'u kontrol et</p>
+</header>
+
+<div class="metrics">
+  <div class="metric"><div class="metric-label">Aktif jest</div><div class="metric-value" id="m-gesture">—</div></div>
+  <div class="metric"><div class="metric-label">Toplam basış</div><div class="metric-value" id="m-count">0</div></div>
+  <div class="metric"><div class="metric-label">Son tuş</div><div class="metric-value" id="m-key">—</div></div>
+</div>
+
+<div class="keys-grid">
+  <div class="key-card" id="card-index_up">
+    <div class="icon">☝️</div>
+    <div class="gesture-label">işaret parmağı</div>
+    <div class="action-label">Oynat / Duraklat</div>
+    <div class="key-badge">Space</div>
+  </div>
+  <div class="key-card" id="card-two_fingers">
+    <div class="icon">✌️</div>
+    <div class="gesture-label">iki parmak</div>
+    <div class="action-label">10sn Geri Al</div>
+    <div class="key-badge">J</div>
+  </div>
+  <div class="key-card" id="card-horns">
+    <div class="icon">🤘</div>
+    <div class="gesture-label">horns</div>
+    <div class="action-label">10sn İleri Al</div>
+    <div class="key-badge">L</div>
+  </div>
+  <div class="key-card" id="card-open_hand">
+    <div class="icon">🖐️</div>
+    <div class="gesture-label">açık el</div>
+    <div class="action-label">Sesi Kapat</div>
+    <div class="key-badge">M</div>
+  </div>
+  <div class="key-card" id="card-fist">
+    <div class="icon">✊</div>
+    <div class="gesture-label">yumruk</div>
+    <div class="action-label">Tam Ekran</div>
+    <div class="key-badge">F</div>
+  </div>
+  <div class="key-card" id="card-thumb_up">
+    <div class="icon">👍</div>
+    <div class="gesture-label">başparmak yukarı</div>
+    <div class="action-label">Sesi Artır</div>
+    <div class="key-badge">↑</div>
+  </div>
+  <div class="key-card" id="card-thumb_down">
+    <div class="icon">👎</div>
+    <div class="gesture-label">başparmak aşağı</div>
+    <div class="action-label">Sesi Azalt</div>
+    <div class="key-badge">↓</div>
+  </div>
+</div>
+
+<div class="log-box">
+  <div class="log-title">Son işlemler</div>
+  <div class="log-list" id="log">
+    <div class="empty-log">Henüz bir jest algılanmadı...</div>
+  </div>
+</div>
+
+<script>
+  const logEntries = [];
+  let pressCount = 0;
+  const dot = document.getElementById('dot');
+  const mGesture = document.getElementById('m-gesture');
+  const mCount = document.getElementById('m-count');
+  const mKey = document.getElementById('m-key');
+  const logEl = document.getElementById('log');
+
+  const gestureNames = {
+    'index_up':   'işaret parmağı',
+    'two_fingers':'iki parmak',
+    'horns':      'horns',
+    'open_hand':  'açık el',
+    'fist':       'yumruk',
+    'thumb_up':   'başparmak yukarı',
+    'thumb_down': 'başparmak aşağı',
+  };
+
+  function flash(el) { el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 400); }
+
+  function triggerGesture(gesture, key) {
+    pressCount++;
+    mGesture.textContent = gestureNames[gesture] || gesture.replace(/_/g, ' ');
+    mCount.textContent = pressCount;
+    mKey.textContent = key.toUpperCase();
+    flash(mCount); flash(mKey);
+
+    const card = document.getElementById('card-' + gesture);
+    if (card) { card.classList.add('lit'); setTimeout(() => card.classList.remove('lit'), 400); }
+
+    const now = new Date().toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    const name = gestureNames[gesture] || gesture.replace(/_/g, ' ');
+    logEntries.unshift({ gesture: name, key: key.toUpperCase(), time: now });
+    if (logEntries.length > 5) logEntries.pop();
+
+    logEl.innerHTML = logEntries.map(e => `
+      <div class="log-entry">
+        <span>${e.gesture} → <span class="key-name">${e.key}</span></span>
+        <span class="log-time">${e.time}</span>
+      </div>
+    `).join('');
+  }
+
+  function connect() {
+    const ws = new WebSocket('ws://localhost:5678');
+    ws.onopen = () => dot.classList.add('active');
+    ws.onclose = () => { dot.classList.remove('active'); setTimeout(connect, 2000); };
+    ws.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+      if (data.gesture && data.key) triggerGesture(data.gesture, data.key);
+    };
+  }
+
+  connect();
+</script>
+</body>
+</html>

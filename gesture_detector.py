@@ -7,8 +7,6 @@ import os
 class GestureDetector:
     def __init__(self):
         model_path = "hand_landmarker.task"
-        
-        # Modeli indir (yoksa)
         if not os.path.exists(model_path):
             print("📥 Model indiriliyor...")
             urllib.request.urlretrieve(
@@ -32,15 +30,57 @@ class GestureDetector:
             return result.hand_landmarks[0]
         return None
 
-    def classify_gesture(self, landmarks):
-        index_up = landmarks[8].y < landmarks[6].y
-        middle_up = landmarks[12].y < landmarks[10].y
+    def is_finger_up(self, landmarks, tip, dip, pip):
+        return landmarks[tip].y < landmarks[dip].y and landmarks[tip].y < landmarks[pip].y
 
-        if index_up and not middle_up:
-            return "index_up"
-        elif not index_up and not middle_up:
+    def classify_gesture(self, landmarks):
+        index_up  = self.is_finger_up(landmarks, 8,  7,  6)
+        middle_up = self.is_finger_up(landmarks, 12, 11, 10)
+        ring_up   = self.is_finger_up(landmarks, 16, 15, 14)
+        pinky_up  = self.is_finger_up(landmarks, 20, 19, 18)
+
+        thumb_tip  = landmarks[4]
+        thumb_ip   = landmarks[3]
+        thumb_mcp  = landmarks[2]
+        index_mcp  = landmarks[5]
+        middle_mcp = landmarks[9]
+
+        fingers_up_count = sum([index_up, middle_up, ring_up, pinky_up])
+
+        # Başparmak yönü — diğer parmaklardan bağımsız net kontrol
+        thumb_up_clear   = (thumb_tip.y < thumb_mcp.y - 0.08)
+        thumb_down_clear = (thumb_tip.y > thumb_mcp.y + 0.08)
+
+        # Yumruk — tüm parmaklar kapalı VE başparmak yatay/içeride
+        # başparmak ucu orta parmak MCP'sinden aşağıda olmalı
+        thumb_tucked = thumb_tip.y > index_mcp.y
+
+        # 👍 Başparmak yukarı — sadece 4 parmak kapalı ve başparmak net yukarı
+        if thumb_up_clear and fingers_up_count == 0:
+            return "thumb_up"
+
+        # 👎 Başparmak aşağı — sadece 4 parmak kapalı ve başparmak net aşağı
+        if thumb_down_clear and fingers_up_count == 0:
+            return "thumb_down"
+
+        # ✊ Yumruk — tüm parmaklar kapalı VE başparmak içeride/yatay
+        if fingers_up_count == 0 and thumb_tucked and not thumb_up_clear and not thumb_down_clear:
             return "fist"
-        elif index_up and middle_up:
-            return "two_fingers"
-        else:
+
+        # 🖐️ Açık el — 4 parmak açık
+        if fingers_up_count >= 4:
             return "open_hand"
+
+        # ☝️ Sadece işaret parmağı
+        if index_up and not middle_up and not ring_up and not pinky_up:
+            return "index_up"
+
+        # ✌️ İki parmak
+        if index_up and middle_up and not ring_up and not pinky_up:
+            return "two_fingers"
+
+        # 🤘 Horns (işaret + serçe) — call me yerine
+        if index_up and pinky_up and not middle_up and not ring_up:
+            return "horns"
+
+        return None
