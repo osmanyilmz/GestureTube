@@ -11,50 +11,92 @@
     --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.15);
     --text: #f0f0f0; --muted: #888;
     --blue: #378ADD; --blue-bg: rgba(55,138,221,0.12); --blue-border: rgba(55,138,221,0.4);
-    --green: #5DCAA5; --radius: 12px; --radius-sm: 8px;
+    --green: #5DCAA5; --red: #E05C5C; --radius: 12px; --radius-sm: 8px;
   }
   body {
     background: var(--bg); color: var(--text);
     font-family: 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
     min-height: 100vh; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; padding: 2rem; gap: 1.5rem;
+    align-items: center; padding: 2rem; gap: 1.5rem;
   }
   header { text-align: center; margin-bottom: 0.5rem; }
   header h1 { font-size: 15px; font-weight: 500; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
   header p { font-size: 12px; color: #555; margin-top: 4px; }
-  .status-dot {
-    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
-    background: #444; margin-right: 8px; transition: background 0.3s;
-  }
+  .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #444; margin-right: 8px; transition: background 0.3s; }
   .status-dot.active { background: var(--green); box-shadow: 0 0 8px var(--green); }
-  .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; max-width: 600px; }
+
+  .tabs { display: flex; gap: 6px; width: 100%; max-width: 600px; }
+  .tab {
+    flex: 1; padding: 8px; text-align: center; font-size: 13px; font-weight: 500;
+    background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-sm);
+    cursor: pointer; color: var(--muted); transition: all 0.15s;
+  }
+  .tab.active { background: var(--blue-bg); border-color: var(--blue-border); color: var(--blue); }
+
+  .panel { display: none; width: 100%; max-width: 600px; flex-direction: column; gap: 1rem; }
+  .panel.active { display: flex; }
+
+  .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
   .metric { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; text-align: center; }
   .metric-label { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
   .metric-value { font-size: 20px; font-weight: 500; color: var(--text); transition: color 0.2s; }
   .metric-value.flash { color: var(--blue); }
-  .keys-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; max-width: 600px; }
-  .key-card {
-    background: var(--surface); border: 0.5px solid var(--border);
-    border-radius: var(--radius); padding: 18px 12px; text-align: center;
-    transition: border-color 0.15s, background 0.15s, transform 0.1s;
-  }
+
+  .keys-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
+  .key-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 18px 12px; text-align: center; transition: all 0.15s; }
   .key-card.lit { background: var(--blue-bg); border: 1.5px solid var(--blue-border); transform: scale(0.97); }
-  .key-card .icon { font-size: 28px; margin-bottom: 8px; line-height: 1; }
-  .key-card .gesture-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
-  .key-card .action-label { font-size: 12px; color: var(--text); margin-bottom: 8px; font-weight: 500; }
-  .key-badge {
-    display: inline-block; background: var(--surface2); border: 0.5px solid var(--border2);
-    border-radius: 6px; padding: 3px 8px; font-size: 12px; font-weight: 500;
-    letter-spacing: 0.04em; transition: background 0.15s, color 0.15s; color: var(--muted);
-  }
+  .key-card .icon { font-size: 28px; margin-bottom: 8px; }
+  .key-card .gesture-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .key-card .action-label { font-size: 12px; color: var(--text); font-weight: 500; margin-bottom: 8px; }
+  .key-badge { display: inline-block; background: var(--surface2); border: 0.5px solid var(--border2); border-radius: 6px; padding: 3px 8px; font-size: 12px; font-weight: 500; color: var(--muted); transition: all 0.15s; }
   .key-card.lit .key-badge { background: var(--blue); color: #fff; border-color: var(--blue); }
-  .log-box { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; width: 100%; max-width: 600px; }
+
+  .log-box { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; width: 100%; }
   .log-title { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 10px; }
   .log-list { display: flex; flex-direction: column; gap: 5px; min-height: 52px; }
   .log-entry { display: flex; justify-content: space-between; align-items: center; background: var(--surface2); border-radius: 6px; padding: 6px 10px; font-size: 13px; animation: fadeIn 0.2s ease; }
   .log-entry .key-name { font-weight: 500; color: var(--blue); }
   .log-entry .log-time { font-size: 11px; color: var(--muted); }
   .empty-log { font-size: 13px; color: var(--muted); font-style: italic; }
+
+  /* Ayarlar paneli */
+  .settings-header { display: flex; justify-content: space-between; align-items: center; }
+  .settings-header span { font-size: 13px; color: var(--muted); }
+  .btn {
+    padding: 7px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500;
+    cursor: pointer; border: none; transition: all 0.15s;
+  }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-danger { background: rgba(224,92,92,0.15); color: var(--red); border: 0.5px solid rgba(224,92,92,0.3); }
+  .btn-danger:hover { background: rgba(224,92,92,0.25); }
+  .btn-ghost { background: var(--surface2); color: var(--muted); border: 0.5px solid var(--border2); }
+  .btn-ghost:hover { color: var(--text); }
+
+  .gesture-row {
+    display: grid; grid-template-columns: 40px 1fr 1fr auto;
+    align-items: center; gap: 10px;
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm); padding: 10px 14px;
+  }
+  .gesture-row .emoji { font-size: 22px; text-align: center; }
+  .gesture-row select, .gesture-row input {
+    background: var(--surface2); border: 0.5px solid var(--border2);
+    border-radius: 6px; padding: 6px 10px; font-size: 13px;
+    color: var(--text); outline: none; width: 100%;
+  }
+  .gesture-row select:focus, .gesture-row input:focus { border-color: var(--blue); }
+  .gesture-row .del-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; padding: 4px; }
+  .gesture-row .del-btn:hover { color: var(--red); }
+
+  .add-row { display: flex; gap: 8px; align-items: center; }
+  .add-row select, .add-row input { flex: 1; background: var(--surface2); border: 0.5px solid var(--border2); border-radius: 6px; padding: 8px 10px; font-size: 13px; color: var(--text); outline: none; }
+  .add-row select:focus, .add-row input:focus { border-color: var(--blue); }
+
+  .save-bar { display: flex; justify-content: flex-end; gap: 8px; padding-top: 4px; }
+  .toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); background: var(--green); color: #000; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 500; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+
   @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
@@ -65,118 +107,216 @@
   <p>Kamera ile YouTube'u kontrol et</p>
 </header>
 
-<div class="metrics">
-  <div class="metric"><div class="metric-label">Aktif jest</div><div class="metric-value" id="m-gesture">—</div></div>
-  <div class="metric"><div class="metric-label">Toplam basış</div><div class="metric-value" id="m-count">0</div></div>
-  <div class="metric"><div class="metric-label">Son tuş</div><div class="metric-value" id="m-key">—</div></div>
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('monitor')">📊 İzleme</div>
+  <div class="tab" onclick="switchTab('settings')">⚙️ Ayarlar</div>
 </div>
 
-<div class="keys-grid">
-  <div class="key-card" id="card-index_up">
-    <div class="icon">☝️</div>
-    <div class="gesture-label">işaret parmağı</div>
-    <div class="action-label">Oynat / Duraklat</div>
-    <div class="key-badge">Space</div>
+<!-- İZLEME PANELİ -->
+<div class="panel active" id="panel-monitor">
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">Aktif jest</div><div class="metric-value" id="m-gesture">—</div></div>
+    <div class="metric"><div class="metric-label">Toplam basış</div><div class="metric-value" id="m-count">0</div></div>
+    <div class="metric"><div class="metric-label">Son tuş</div><div class="metric-value" id="m-key">—</div></div>
   </div>
-  <div class="key-card" id="card-two_fingers">
-    <div class="icon">✌️</div>
-    <div class="gesture-label">iki parmak</div>
-    <div class="action-label">10sn Geri Al</div>
-    <div class="key-badge">J</div>
-  </div>
-  <div class="key-card" id="card-horns">
-    <div class="icon">🤘</div>
-    <div class="gesture-label">horns</div>
-    <div class="action-label">10sn İleri Al</div>
-    <div class="key-badge">L</div>
-  </div>
-  <div class="key-card" id="card-open_hand">
-    <div class="icon">🖐️</div>
-    <div class="gesture-label">açık el</div>
-    <div class="action-label">Sesi Kapat</div>
-    <div class="key-badge">M</div>
-  </div>
-  <div class="key-card" id="card-fist">
-    <div class="icon">✊</div>
-    <div class="gesture-label">yumruk</div>
-    <div class="action-label">Tam Ekran</div>
-    <div class="key-badge">F</div>
-  </div>
-  <div class="key-card" id="card-thumb_up">
-    <div class="icon">👍</div>
-    <div class="gesture-label">başparmak yukarı</div>
-    <div class="action-label">Sesi Artır</div>
-    <div class="key-badge">↑</div>
-  </div>
-  <div class="key-card" id="card-thumb_down">
-    <div class="icon">👎</div>
-    <div class="gesture-label">başparmak aşağı</div>
-    <div class="action-label">Sesi Azalt</div>
-    <div class="key-badge">↓</div>
+
+  <div class="keys-grid" id="keys-grid"></div>
+
+  <div class="log-box">
+    <div class="log-title">Son işlemler</div>
+    <div class="log-list" id="log">
+      <div class="empty-log">Henüz bir jest algılanmadı...</div>
+    </div>
   </div>
 </div>
 
-<div class="log-box">
-  <div class="log-title">Son işlemler</div>
-  <div class="log-list" id="log">
-    <div class="empty-log">Henüz bir jest algılanmadı...</div>
+<!-- AYARLAR PANELİ -->
+<div class="panel" id="panel-settings">
+  <div class="settings-header">
+    <span>Jest → Tuş eşlemelerini düzenle</span>
+  </div>
+
+  <div id="gesture-rows"></div>
+
+  <div style="background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 14px;">
+    <div style="font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px;">Yeni Jest Ekle</div>
+    <div class="add-row">
+      <select id="new-gesture">
+        <option value="index_up">☝️ işaret parmağı</option>
+        <option value="two_fingers">✌️ iki parmak</option>
+        <option value="horns">🤘 horns</option>
+        <option value="open_hand">🖐️ açık el</option>
+        <option value="fist">✊ yumruk</option>
+        <option value="thumb_up">👍 başparmak yukarı</option>
+        <option value="thumb_down">👎 başparmak aşağı</option>
+      </select>
+      <input type="text" id="new-key" placeholder="tuş (örn: space, f, up)" maxlength="20">
+      <button class="btn btn-primary" onclick="addGesture()">+ Ekle</button>
+    </div>
+  </div>
+
+  <div class="save-bar">
+    <button class="btn btn-ghost" onclick="resetDefaults()">Varsayılana Dön</button>
+    <button class="btn btn-primary" onclick="saveConfig()">💾 Kaydet</button>
   </div>
 </div>
+
+<div class="toast" id="toast"></div>
 
 <script>
-  const logEntries = [];
-  let pressCount = 0;
-  const dot = document.getElementById('dot');
-  const mGesture = document.getElementById('m-gesture');
-  const mCount = document.getElementById('m-count');
-  const mKey = document.getElementById('m-key');
-  const logEl = document.getElementById('log');
-
-  const gestureNames = {
-    'index_up':   'işaret parmağı',
-    'two_fingers':'iki parmak',
-    'horns':      'horns',
-    'open_hand':  'açık el',
-    'fist':       'yumruk',
-    'thumb_up':   'başparmak yukarı',
-    'thumb_down': 'başparmak aşağı',
+  const GESTURE_INFO = {
+    'index_up':   { icon: '☝️', label: 'işaret parmağı' },
+    'two_fingers':{ icon: '✌️', label: 'iki parmak' },
+    'horns':      { icon: '🤘', label: 'horns' },
+    'open_hand':  { icon: '🖐️', label: 'açık el' },
+    'fist':       { icon: '✊', label: 'yumruk' },
+    'thumb_up':   { icon: '👍', label: 'başparmak yukarı' },
+    'thumb_down': { icon: '👎', label: 'başparmak aşağı' },
   };
+
+  const DEFAULT_CONFIG = {
+    'index_up':    { key: 'space',  action: 'Oynat / Duraklat' },
+    'two_fingers': { key: 'j',     action: '10sn Geri Al' },
+    'horns':       { key: 'l',     action: '10sn İleri Al' },
+    'open_hand':   { key: 'm',     action: 'Sesi Kapat' },
+    'fist':        { key: 'f',     action: 'Tam Ekran' },
+    'thumb_up':    { key: 'up',    action: 'Sesi Artır' },
+    'thumb_down':  { key: 'down',  action: 'Sesi Azalt' },
+  };
+
+  let currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+  let ws = null;
+  let pressCount = 0;
+  const logEntries = [];
+
+  // --- TAB ---
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', ['monitor','settings'][i] === name));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+  }
+
+  // --- İZLEME ---
+  function renderKeyCards() {
+    const grid = document.getElementById('keys-grid');
+    grid.innerHTML = Object.entries(currentConfig).map(([gesture, cfg]) => {
+      const info = GESTURE_INFO[gesture] || { icon: '🤚', label: gesture };
+      return `
+        <div class="key-card" id="card-${gesture}">
+          <div class="icon">${info.icon}</div>
+          <div class="gesture-label">${info.label}</div>
+          <div class="action-label">${cfg.action || cfg.key}</div>
+          <div class="key-badge">${cfg.key.toUpperCase()}</div>
+        </div>`;
+    }).join('');
+  }
 
   function flash(el) { el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 400); }
 
   function triggerGesture(gesture, key) {
     pressCount++;
-    mGesture.textContent = gestureNames[gesture] || gesture.replace(/_/g, ' ');
-    mCount.textContent = pressCount;
-    mKey.textContent = key.toUpperCase();
-    flash(mCount); flash(mKey);
+    const info = GESTURE_INFO[gesture] || { label: gesture };
+    document.getElementById('m-gesture').textContent = info.label;
+    document.getElementById('m-count').textContent = pressCount;
+    document.getElementById('m-key').textContent = key.toUpperCase();
+    flash(document.getElementById('m-count'));
+    flash(document.getElementById('m-key'));
 
     const card = document.getElementById('card-' + gesture);
     if (card) { card.classList.add('lit'); setTimeout(() => card.classList.remove('lit'), 400); }
 
     const now = new Date().toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-    const name = gestureNames[gesture] || gesture.replace(/_/g, ' ');
-    logEntries.unshift({ gesture: name, key: key.toUpperCase(), time: now });
+    logEntries.unshift({ gesture: info.label, key: key.toUpperCase(), time: now });
     if (logEntries.length > 5) logEntries.pop();
 
-    logEl.innerHTML = logEntries.map(e => `
+    document.getElementById('log').innerHTML = logEntries.map(e => `
       <div class="log-entry">
         <span>${e.gesture} → <span class="key-name">${e.key}</span></span>
         <span class="log-time">${e.time}</span>
-      </div>
-    `).join('');
+      </div>`).join('');
   }
 
+  // --- AYARLAR ---
+  function renderSettingsRows() {
+    const container = document.getElementById('gesture-rows');
+    container.innerHTML = Object.entries(currentConfig).map(([gesture, cfg]) => {
+      const info = GESTURE_INFO[gesture] || { icon: '🤚', label: gesture };
+      return `
+        <div class="gesture-row" id="row-${gesture}">
+          <div class="emoji">${info.icon}</div>
+          <select onchange="updateGesture('${gesture}', 'gesture', this.value)">
+            ${Object.entries(GESTURE_INFO).map(([g, i]) =>
+              `<option value="${g}" ${g === gesture ? 'selected' : ''}>${i.icon} ${i.label}</option>`
+            ).join('')}
+          </select>
+          <input type="text" value="${cfg.key}" placeholder="tuş" maxlength="20"
+            onchange="updateGesture('${gesture}', 'key', this.value)">
+          <button class="del-btn" onclick="deleteGesture('${gesture}')">✕</button>
+        </div>`;
+    }).join('');
+  }
+
+  function updateGesture(gesture, field, value) {
+    if (field === 'key') {
+      currentConfig[gesture].key = value.toLowerCase().trim();
+    }
+  }
+
+  function deleteGesture(gesture) {
+    delete currentConfig[gesture];
+    renderSettingsRows();
+    renderKeyCards();
+  }
+
+  function addGesture() {
+    const gesture = document.getElementById('new-gesture').value;
+    const key = document.getElementById('new-key').value.toLowerCase().trim();
+    if (!key) { showToast('⚠️ Tuş boş olamaz!'); return; }
+    currentConfig[gesture] = { key, action: GESTURE_INFO[gesture]?.label || gesture };
+    document.getElementById('new-key').value = '';
+    renderSettingsRows();
+    renderKeyCards();
+    showToast('✅ Jest eklendi');
+  }
+
+  function saveConfig() {
+    const flat = {};
+    Object.entries(currentConfig).forEach(([g, cfg]) => { flat[g] = cfg.key; });
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'save_config', data: flat }));
+    }
+    renderKeyCards();
+    showToast('💾 Kaydedildi!');
+  }
+
+  function resetDefaults() {
+    currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+    renderSettingsRows();
+    renderKeyCards();
+    showToast('🔄 Varsayılana döndü');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  // --- WEBSOCKET ---
   function connect() {
-    const ws = new WebSocket('ws://localhost:5678');
-    ws.onopen = () => dot.classList.add('active');
-    ws.onclose = () => { dot.classList.remove('active'); setTimeout(connect, 2000); };
+    ws = new WebSocket('ws://localhost:5678');
+    ws.onopen = () => document.getElementById('dot').classList.add('active');
+    ws.onclose = () => { document.getElementById('dot').classList.remove('active'); setTimeout(connect, 2000); };
     ws.onmessage = (e) => {
       const data = JSON.parse(e.data);
-      if (data.gesture && data.key) triggerGesture(data.gesture, data.key);
+      if (data.type === 'gesture') triggerGesture(data.gesture, data.key);
     };
   }
 
+  // --- INIT ---
+  renderKeyCards();
+  renderSettingsRows();
   connect();
 </script>
 </body>

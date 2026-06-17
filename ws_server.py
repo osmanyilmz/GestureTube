@@ -4,11 +4,19 @@ import json
 import threading
 
 clients = set()
+pending_config = None
 
 async def handler(websocket):
+    global pending_config
     clients.add(websocket)
     try:
-        await websocket.wait_closed()
+        async for message in websocket:
+            try:
+                data = json.loads(message)
+                if data.get("type") == "save_config":
+                    pending_config = data.get("data")
+            except Exception:
+                pass
     finally:
         clients.discard(websocket)
 
@@ -26,7 +34,7 @@ def run_in_background():
     t.start()
 
 def broadcast(gesture, key):
-    msg = json.dumps({"gesture": gesture, "key": key})
+    msg = json.dumps({"type": "gesture", "gesture": gesture, "key": key})
     to_remove = set()
     for ws in list(clients):
         try:
