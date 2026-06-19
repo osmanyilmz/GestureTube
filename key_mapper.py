@@ -6,15 +6,17 @@ class KeyMapper:
     def __init__(self):
         self.last_gesture = None
         self.last_press_time = 0
-        self.cooldown = 1.0
-        self.gesture_key_map = {}
+        self.cooldown = 1.5  # jest başına bekleme süresi (saniye)
 
     def press(self, gesture):
         now = time.time()
 
-        if gesture == self.last_gesture:
-            return
+        # Cooldown dolmadan hiçbir jest kabul etme (aynı veya farklı)
         if now - self.last_press_time < self.cooldown:
+            return
+
+        # Aynı jest tekrar gelirse basma
+        if gesture == self.last_gesture:
             return
 
         self.last_gesture = gesture

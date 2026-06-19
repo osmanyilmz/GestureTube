@@ -175,13 +175,13 @@
   };
 
   const DEFAULT_CONFIG = {
-    'index_up':    { key: 'space',  action: 'Oynat / Duraklat' },
-    'two_fingers': { key: 'j',     action: '10sn Geri Al' },
-    'horns':       { key: 'l',     action: '10sn İleri Al' },
-    'open_hand':   { key: 'm',     action: 'Sesi Kapat' },
-    'fist':        { key: 'f',     action: 'Tam Ekran' },
-    'thumb_up':    { key: 'up',    action: 'Sesi Artır' },
-    'thumb_down':  { key: 'down',  action: 'Sesi Azalt' },
+    'index_up':    { key: 'space', action: 'Oynat / Duraklat' },
+    'two_fingers': { key: 'j',    action: '10sn Geri Al' },
+    'horns':       { key: 'l',    action: '10sn İleri Al' },
+    'open_hand':   { key: 'm',    action: 'Sesi Kapat' },
+    'fist':        { key: 'f',    action: 'Tam Ekran' },
+    'thumb_up':    { key: 'up',   action: 'Sesi Artır' },
+    'thumb_down':  { key: 'down', action: 'Sesi Azalt' },
   };
 
   let currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
@@ -189,14 +189,27 @@
   let pressCount = 0;
   const logEntries = [];
 
-  // --- TAB ---
   function switchTab(name) {
-    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', ['monitor','settings'][i] === name));
+    document.querySelectorAll('.tab').forEach((t, i) =>
+      t.classList.toggle('active', ['monitor','settings'][i] === name));
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     document.getElementById('panel-' + name).classList.add('active');
   }
 
-  // --- İZLEME ---
+  function applyFlatConfig(flat) {
+    const newConfig = {};
+    Object.entries(flat).forEach(([gesture, key]) => {
+      const info = GESTURE_INFO[gesture];
+      newConfig[gesture] = {
+        key: key,
+        action: DEFAULT_CONFIG[gesture]?.action || info?.label || gesture
+      };
+    });
+    currentConfig = newConfig;
+    renderKeyCards();
+    renderSettingsRows();
+  }
+
   function renderKeyCards() {
     const grid = document.getElementById('keys-grid');
     grid.innerHTML = Object.entries(currentConfig).map(([gesture, cfg]) => {
@@ -211,7 +224,10 @@
     }).join('');
   }
 
-  function flash(el) { el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 400); }
+  function flash(el) {
+    el.classList.add('flash');
+    setTimeout(() => el.classList.remove('flash'), 400);
+  }
 
   function triggerGesture(gesture, key) {
     pressCount++;
@@ -236,30 +252,73 @@
       </div>`).join('');
   }
 
-  // --- AYARLAR ---
   function renderSettingsRows() {
     const container = document.getElementById('gesture-rows');
-    container.innerHTML = Object.entries(currentConfig).map(([gesture, cfg]) => {
+    container.innerHTML = '';
+
+    Object.entries(currentConfig).forEach(([gesture, cfg]) => {
       const info = GESTURE_INFO[gesture] || { icon: '🤚', label: gesture };
-      return `
-        <div class="gesture-row" id="row-${gesture}">
-          <div class="emoji">${info.icon}</div>
-          <select onchange="updateGesture('${gesture}', 'gesture', this.value)">
-            ${Object.entries(GESTURE_INFO).map(([g, i]) =>
-              `<option value="${g}" ${g === gesture ? 'selected' : ''}>${i.icon} ${i.label}</option>`
-            ).join('')}
-          </select>
-          <input type="text" value="${cfg.key}" placeholder="tuş" maxlength="20"
-            onchange="updateGesture('${gesture}', 'key', this.value)">
-          <button class="del-btn" onclick="deleteGesture('${gesture}')">✕</button>
-        </div>`;
-    }).join('');
+
+      const row = document.createElement('div');
+      row.className = 'gesture-row';
+      row.id = 'row-' + gesture;
+
+      // Emoji
+      const emoji = document.createElement('div');
+      emoji.className = 'emoji';
+      emoji.textContent = info.icon;
+
+      // Jest seçici
+      const select = document.createElement('select');
+      Object.entries(GESTURE_INFO).forEach(([g, i]) => {
+        const opt = document.createElement('option');
+        opt.value = g;
+        opt.textContent = i.icon + ' ' + i.label;
+        if (g === gesture) opt.selected = true;
+        select.appendChild(opt);
+      });
+      select.addEventListener('change', function() {
+        changeGestureType(gesture, this.value);
+      });
+
+      // Tuş input
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.value = cfg.key;
+      input.placeholder = 'tuş';
+      input.maxLength = 20;
+      input.addEventListener('input', function() {
+        if (currentConfig[gesture]) {
+          currentConfig[gesture].key = this.value.toLowerCase().trim();
+        }
+      });
+
+      // Sil butonu
+      const delBtn = document.createElement('button');
+      delBtn.className = 'del-btn';
+      delBtn.textContent = '✕';
+      delBtn.addEventListener('click', function() {
+        deleteGesture(gesture);
+      });
+
+      row.appendChild(emoji);
+      row.appendChild(select);
+      row.appendChild(input);
+      row.appendChild(delBtn);
+      container.appendChild(row);
+    });
   }
 
-  function updateGesture(gesture, field, value) {
-    if (field === 'key') {
-      currentConfig[gesture].key = value.toLowerCase().trim();
-    }
+  function changeGestureType(oldGesture, newGesture) {
+    if (oldGesture === newGesture) return;
+    const cfg = currentConfig[oldGesture];
+    delete currentConfig[oldGesture];
+    currentConfig[newGesture] = {
+      key: cfg.key,
+      action: DEFAULT_CONFIG[newGesture]?.action || GESTURE_INFO[newGesture]?.label || newGesture
+    };
+    renderSettingsRows();
+    renderKeyCards();
   }
 
   function deleteGesture(gesture) {
@@ -272,7 +331,10 @@
     const gesture = document.getElementById('new-gesture').value;
     const key = document.getElementById('new-key').value.toLowerCase().trim();
     if (!key) { showToast('⚠️ Tuş boş olamaz!'); return; }
-    currentConfig[gesture] = { key, action: GESTURE_INFO[gesture]?.label || gesture };
+    currentConfig[gesture] = {
+      key,
+      action: DEFAULT_CONFIG[gesture]?.action || GESTURE_INFO[gesture]?.label || gesture
+    };
     document.getElementById('new-key').value = '';
     renderSettingsRows();
     renderKeyCards();
@@ -284,9 +346,11 @@
     Object.entries(currentConfig).forEach(([g, cfg]) => { flat[g] = cfg.key; });
     if (ws && ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify({ type: 'save_config', data: flat }));
+      showToast('💾 Kaydedildi!');
+    } else {
+      showToast('⚠️ Bağlantı yok!');
     }
     renderKeyCards();
-    showToast('💾 Kaydedildi!');
   }
 
   function resetDefaults() {
@@ -303,7 +367,6 @@
     setTimeout(() => t.classList.remove('show'), 2000);
   }
 
-  // --- WEBSOCKET ---
   function connect() {
     ws = new WebSocket('ws://localhost:5678');
     ws.onopen = () => document.getElementById('dot').classList.add('active');
@@ -311,10 +374,10 @@
     ws.onmessage = (e) => {
       const data = JSON.parse(e.data);
       if (data.type === 'gesture') triggerGesture(data.gesture, data.key);
+      if (data.type === 'load_config') applyFlatConfig(data.data);
     };
   }
 
-  // --- INIT ---
   renderKeyCards();
   renderSettingsRows();
   connect();
