@@ -1,0 +1,10 @@
+# PyInstaller build dosyaları
+build/
+dist/
+*.spec
+__pycache__/
+*.pyc
+*.pyo
+
+# MediaPipe model dosyası (büyük dosya)
+hand_landmarker.task

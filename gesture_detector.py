@@ -3,10 +3,17 @@ from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 import urllib.request
 import os
+import sys
+
+def resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.dirname(__file__), relative_path)
 
 class GestureDetector:
     def __init__(self):
-        model_path = "hand_landmarker.task"
+        model_path = resource_path("hand_landmarker.task")
+
         if not os.path.exists(model_path):
             print("📥 Model indiriliyor...")
             urllib.request.urlretrieve(
@@ -19,9 +26,9 @@ class GestureDetector:
         options = vision.HandLandmarkerOptions(
             base_options=base_options,
             num_hands=1,
-            min_hand_detection_confidence=0.6,   
-            min_hand_presence_confidence=0.6,    
-            min_tracking_confidence=0.5          
+            min_hand_detection_confidence=0.6,
+            min_hand_presence_confidence=0.6,
+            min_tracking_confidence=0.5
         )
         self.detector = vision.HandLandmarker.create_from_options(options)
 
@@ -47,7 +54,6 @@ class GestureDetector:
         index_mcp  = landmarks[5]
 
         fingers_up_count = sum([index_up, middle_up, ring_up, pinky_up])
-
         thumb_up_clear   = (thumb_tip.y < thumb_mcp.y - 0.08)
         thumb_down_clear = (thumb_tip.y > thumb_mcp.y + 0.08)
         thumb_tucked     = thumb_tip.y > index_mcp.y
