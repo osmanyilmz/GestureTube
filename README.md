@@ -92,3 +92,171 @@ python -m PyInstaller --onefile --noconsole --name GestureController --add-data 
 ---
 
 ## 📁 Project Structure
+
+CameraMotion/
+
+├── main.py                 # Main application
+
+├── gesture_detector.py     # Hand gesture detection (MediaPipe)
+
+├── key_mapper.py           # Gesture → Key mapping
+
+├── ws_server.py            # WebSocket server
+
+├── gesture_config.json     # Saved settings
+
+├── templates/
+
+│   └── index.html          # Browser dashboard
+
+└── chrome-extension/       # Chrome extension
+
+├── manifest.json
+
+├── content.js
+
+├── background.js
+
+├── popup.html
+
+└── popup.js
+
+---
+
+## ❓ FAQ
+
+**Extension says "Python is not running"?**  
+Make sure `GestureController.exe` is running. If it is, refresh the YouTube tab.
+
+**Gestures are not recognized correctly?**  
+Hold your hand flat in front of the camera and try to have a plain background behind you.
+
+**Windows Defender shows a warning?**  
+Click "More info" → "Run anyway". This is a common false positive for PyInstaller apps.
+
+**Does it work on Mac or Linux?**  
+The source code works on all platforms. The `.exe` is Windows only. On Mac/Linux run `python main.py` directly.
+
+---
+
+## 🤝 Contributing
+
+Pull requests and issues are welcome!
+
+---
+
+## 📄 License
+
+MIT License
+
+---
+---
+
+# 🎮 YouTube Gesture Controller — Türkçe
+
+Elinizin hareketlerini kullanarak YouTube'u kontrol edin! Kamera karşısında el jestleri yaparak video oynatma, durdurma, ses ayarlama ve daha fazlasını yapabilirsiniz.
+
+---
+
+## 🎯 Jestler
+
+| Jest | Eylem |
+|------|-------|
+| ☝️ İşaret parmağı | Oynat / Duraklat |
+| ✌️ İki parmak | 10sn Geri Al |
+| 🤘 Horns | 10sn İleri Al |
+| 🖐️ Açık el | Sesi Kapat |
+| ✊ Yumruk | Tam Ekran |
+| 👍 Başparmak yukarı | Sesi Artır |
+| 👎 Başparmak aşağı | Sesi Azalt |
+
+---
+
+## 📦 Kurulum
+
+### 1. GestureController.exe'yi İndir
+
+Sağ taraftaki **Releases** bölümünden `GestureController.exe` dosyasını indirin.
+
+### 2. Chrome Eklentisini Kur
+
+1. Bu repoyu ZIP olarak indirin → **Code → Download ZIP**
+2. ZIP'i çıkartın
+3. Chrome'da `chrome://extensions` adresine gidin
+4. Sağ üstten **Geliştirici modu**'nu açın
+5. **Paketlenmemiş öğe yükle** butonuna tıklayın
+6. İndirdiğiniz klasörün içindeki `chrome-extension` klasörünü seçin
+
+---
+
+## 🚀 Kullanım
+
+1. `GestureController.exe` dosyasını çalıştırın
+2. Kamera penceresi ve tarayıcı arayüzü otomatik açılır
+3. Chrome'da bir YouTube videosu açın
+4. El hareketlerinizi kameraya gösterin!
+
+> ⚠️ GestureController.exe çalışırken YouTube sekmesi aktif olmalıdır.
+
+---
+
+## ⚙️ Jest Ayarları
+
+Tarayıcıda açılan arayüzden **⚙️ Ayarlar** sekmesine giderek:
+- Jestlere farklı tuşlar atayabilirsiniz
+- İstemediğiniz jestleri kaldırabilirsiniz
+- Yeni jest ekleyebilirsiniz
+- Değişiklikler otomatik kaydedilir
+
+---
+
+## 🛠️ Geliştirici Kurulumu
+
+Kodu kendiniz çalıştırmak istiyorsanız:
+
+### Gereksinimler
+
+- Python 3.10+
+- Webcam
+
+### Kurulum
+
+```bash
+# Repoyu klonlayın
+git clone https://github.com/osmanyilmz/CameraMotion.git
+cd CameraMotion
+
+# Kütüphaneleri kurun
+pip install opencv-python mediapipe==0.10.33 pyautogui pynput websockets
+
+# Çalıştırın
+python main.py
+```
+
+---
+
+## ❓ Sık Sorulan Sorular
+
+**Eklenti "Python çalışmıyor" diyor?**  
+`GestureController.exe`'nin çalıştığından emin olun. Çalışıyorsa YouTube sekmesini yenileyin.
+
+**Jestler yanlış algılanıyor?**  
+Elinizi kameranın karşısında düz tutun, arka planın sade olmasına dikkat edin.
+
+**Windows Defender uyarı veriyor?**  
+"Daha fazla bilgi" → "Yine de çalıştır" seçeneğine tıklayın. Bu bir PyInstaller uygulaması olduğu için bazı antivirüsler yanlış pozitif verebilir.
+
+**Mac veya Linux'ta çalışıyor mu?**  
+Kaynak kod tüm platformlarda çalışır. `.exe` yalnızca Windows içindir. Mac/Linux'ta direkt `python main.py` çalıştırın.
+
+---
+
+## 🤝 Katkıda Bulunma
+
+Pull request ve issue'lar memnuniyetle karşılanır!
+
+---
+
+## 📄 Lisans
+
+MIT License
