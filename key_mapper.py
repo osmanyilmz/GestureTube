@@ -11,7 +11,6 @@ class KeyMapper:
     def press(self, gesture):
         now = time.time()
 
-        # Cooldown dolmadan hiçbir jest kabul etme (aynı veya farklı)
         if now - self.last_press_time < self.cooldown:
             return
 
